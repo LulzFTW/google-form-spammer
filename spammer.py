@@ -58,7 +58,7 @@ def main():
                     fail += 1
                 else:
                     success += 1
-            except socket.timeout:
+            except (ConnectionError, socket.timeout):
                 fail += 1
     except KeyboardInterrupt:
         print()
