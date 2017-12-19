@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import collections
 import hyper
 import json
 import re
