@@ -43,21 +43,24 @@ def main():
 
     c = hyper.HTTPConnection('docs.google.com:443')
 
+    deque = collections.deque()
+    for _ in range(args.window_size):
+        deque.append(send_request(c, action, form))
+
     while True:
         status = 'Successful: %i, Failed: %i' % (success, fail)
         print(status, flush=True, end='\r')
 
-        r = [send_request(c, action, form) for _ in range(args.window_size)]
+        try:
+            resp = c.get_response(deque.popleft())
+            text = resp.read().decode('utf-8')
+            if pattern.search(text):
+                raise ValueError('form response rejected')
+            success += 1
+        except (ValueError, ConnectionError, socket.timeout):
+            fail += 1
 
-        for request in r:
-            try:
-                resp = c.get_response(request)
-                text = resp.read().decode('utf-8')
-                if pattern.search(text):
-                    raise ValueError('form response rejected')
-                success += 1
-            except (ValueError, ConnectionError, socket.timeout):
-                fail += 1
+        deque.append(send_request(c, action, form))
 
 
 def send_request(conn, action, form):
