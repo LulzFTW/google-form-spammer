@@ -21,7 +21,7 @@ headers = {'Content-type': 'application/x-www-form-urlencoded'}
 def main():
     parser = argparse.ArgumentParser(description='Spams a Google Form.')
     parser.add_argument('url', help='the url of the form to spam')
-    parser.add_argument('--window-size', type=int, default=100,
+    parser.add_argument('--window-size', type=int, default=10,
                         help='number of requests to send at once')
     args = parser.parse_args()
 
@@ -51,6 +51,8 @@ def main():
         for request in r:
             try:
                 resp = c.get_response(request)
+                if resp.status is not 200:
+                    raise ValueError('invalid response from server')
                 text = resp.read().decode('utf-8')
                 if pattern.search(text):
                     raise ValueError('form response rejected')
